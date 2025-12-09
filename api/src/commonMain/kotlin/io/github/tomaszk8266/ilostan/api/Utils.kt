@@ -25,6 +25,8 @@ fun parseSections(root: Element): Map<String, Element> {
     return result
 }
 
-fun String.parseDate() = LocalDate.parse(replace("**", "01").replace("xx", "01"))
+fun String.parseDate() = try {
+    LocalDate.parse(replace("**", "01").replace("xx", "01"))
+} catch (_: Exception) { null }
 
 fun String.trimQuotes() = Regex("""^"?(.*?)"?$""").find(this)!!.groupValues[1]
