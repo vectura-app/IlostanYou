@@ -1,7 +1,10 @@
 package io.github.tomaszk8266.ilostan.api
 
 import com.fleeksoft.ksoup.nodes.Element
+import io.ktor.client.HttpClient
 import kotlinx.datetime.LocalDate
+
+val client = HttpClient()
 
 fun parseSections(root: Element): Map<String, Element> {
     val result = mutableMapOf<String, Element>()

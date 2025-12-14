@@ -3,6 +3,7 @@ package io.github.tomaszk8266.ilostan.api.types
 import kotlinx.datetime.LocalDate
 
 data class Vehicle(
+    val id: Int,
     val name: String,
     val factoryNumber: String?,
     val manufacturingYear: Int,
@@ -25,7 +26,7 @@ data class Vehicle(
     )
 
     data class OwnershipEntry(
-        val transferDate: LocalDate,
+        val transferDate: LocalDate?,
         val owner: String,
         val carrier: String?
     )
