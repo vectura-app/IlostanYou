@@ -31,3 +31,4 @@ dependencyResolutionManagement {
 include(":composeApp")
 include(":api")
 include(":androidApp")
+include(":app")
