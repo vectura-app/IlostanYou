@@ -33,3 +33,5 @@ fun String.parseDate() = try {
 } catch (_: Exception) { null }
 
 fun String.trimQuotes() = Regex("""^"?(.*?)"?$""").find(this)!!.groupValues[1]
+
+fun getPhotoUrl(id: Int) = "https://ilostan.forumkolejowe.pl/foto/$id"

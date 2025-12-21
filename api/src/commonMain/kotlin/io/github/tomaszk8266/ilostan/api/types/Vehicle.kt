@@ -38,12 +38,6 @@ data class Vehicle(
         val type: String,
     )
 
-    data class Photo(
-        val date: LocalDate,
-        val id: Int,
-        val description: String,
-    )
-
     enum class Status {
         Operated,
         Unoperated,
