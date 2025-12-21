@@ -1,10 +1,15 @@
 package ovh.marceeli.ilostanyou.ui
 
-
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Dashboard
+import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.outlined.Dashboard
+import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
@@ -21,14 +26,13 @@ import androidx.compose.ui.res.stringResource
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import ovh.marceeli.ilostanyou.ui.routes.Route
+import org.koin.compose.koinInject
 import ovh.marceeli.ilostanyou.R
-import androidx.compose.material.icons.filled.Dashboard
-import androidx.compose.material.icons.filled.Info
-import androidx.compose.material.icons.outlined.Dashboard
-import androidx.compose.material.icons.outlined.Info
+import ovh.marceeli.ilostanyou.ui.routes.Route
 import ovh.marceeli.ilostanyou.ui.screens.AboutScreen
 import ovh.marceeli.ilostanyou.ui.screens.DashboardScreen
+import ovh.marceeli.ilostanyou.ui.screens.TypesScreen
+import ovh.marceeli.ilostanyou.ui.viewmodels.SharedDashboardViewModel
 
 data class BarItem(
     val label: String,
@@ -43,8 +47,13 @@ fun Navigation(
     modifier: Modifier = Modifier,
 ) {
     val navController = rememberNavController()
+    val sharedViewModel: SharedDashboardViewModel = koinInject()
     var currentScreen by remember { mutableStateOf<Route?>(null) }
-    val noBottomNavScreens = emptyList<Route>()
+
+    val noBottomNavScreens = listOf(Route.Types)
+
+    val screensWithBackButton = listOf(Route.Types)
+
     val navigationItems = listOf(
         BarItem(
             stringResource(R.string.dashboard_title),
@@ -52,7 +61,6 @@ fun Navigation(
             Icons.Outlined.Dashboard,
             Route.Dashboard
         ),
-
         BarItem(
             stringResource(R.string.about_title),
             Icons.Filled.Info,
@@ -60,6 +68,7 @@ fun Navigation(
             Route.About
         ),
     )
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -69,9 +78,20 @@ fun Navigation(
                             null -> stringResource(R.string.app_name)
                             Route.About -> stringResource(R.string.about_title)
                             Route.Dashboard -> stringResource(R.string.dashboard_title)
+                            Route.Types -> "Vehicle Types"
                         }
                     )
                 },
+                navigationIcon = {
+                    if (screensWithBackButton.contains(currentScreen)) {
+                        IconButton(onClick = { navController.navigateUp() }) {
+                            Icon(
+                                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                                contentDescription = "Back"
+                            )
+                        }
+                    }
+                }
             )
         },
         bottomBar = {
@@ -105,15 +125,19 @@ fun Navigation(
             modifier = Modifier.padding(innerPadding),
             startDestination = Route.Dashboard
         ) {
-
             composable<Route.Dashboard> {
                 currentScreen = Route.Dashboard
-                DashboardScreen()
+                DashboardScreen(navController = navController, viewModel = sharedViewModel)
             }
 
             composable<Route.About> {
                 currentScreen = Route.About
                 AboutScreen()
+            }
+
+            composable<Route.Types> {
+                currentScreen = Route.Types
+                TypesScreen(viewModel = sharedViewModel)
             }
         }
     }

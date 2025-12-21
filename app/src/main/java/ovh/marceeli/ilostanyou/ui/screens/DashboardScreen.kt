@@ -17,28 +17,29 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.snapshots.SnapshotStateMap
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
-import io.github.tomaszk8266.ilostan.api.extractors.getAndExtractCategories
-import io.github.tomaszk8266.ilostan.api.extractors.getAndExtractVehiclesTypes
+import androidx.navigation.NavController
 import io.github.tomaszk8266.ilostan.api.types.Category
 import io.github.tomaszk8266.ilostan.api.types.VehiclesTypes
+import org.koin.compose.viewmodel.koinViewModel
 import ovh.marceeli.ilostanyou.ui.common.theme.ExpressiveListItemShapes
+import ovh.marceeli.ilostanyou.ui.routes.Route
+import ovh.marceeli.ilostanyou.ui.viewmodels.SharedDashboardViewModel
 
 @Composable
-fun DashboardScreen() {
-    val categories = remember { mutableStateMapOf<Category, List<VehiclesTypes>>() }
-
+fun DashboardScreen(
+    navController: NavController,
+    viewModel: SharedDashboardViewModel
+) {
     LaunchedEffect(Unit) {
-        categories.putAll(
-            getAndExtractCategories()
-                .associateWith { getAndExtractVehiclesTypes(it.id) }
-        )
+        viewModel.fetchCategoriesIfNeeded()
     }
+
+    val categories = viewModel.categories
 
     Column(
         modifier = Modifier
@@ -46,12 +47,20 @@ fun DashboardScreen() {
             .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        CategoryList(categories)
+        CategoryList(
+            categories = categories,
+            navController = navController,
+            viewModel = viewModel
+        )
     }
 }
 
 @Composable
-fun CategoryList(categories: SnapshotStateMap<Category, List<VehiclesTypes>>) {
+fun CategoryList(
+    categories: SnapshotStateMap<Category, List<VehiclesTypes>>,
+    navController: NavController,
+    viewModel: SharedDashboardViewModel = koinViewModel()
+) {
     if (categories.isEmpty()) {
         Card(
             modifier = Modifier.fillMaxWidth(),
@@ -72,7 +81,7 @@ fun CategoryList(categories: SnapshotStateMap<Category, List<VehiclesTypes>>) {
         ) {
             val list = categories.toList()
 
-            itemsIndexed(categories.toList()) { index, (category, types) ->
+            itemsIndexed(list) { index, (category, types) ->
                 val isFirst = index == 0
                 val isLast = index == list.lastIndex
 
@@ -89,7 +98,10 @@ fun CategoryList(categories: SnapshotStateMap<Category, List<VehiclesTypes>>) {
                         .clickable(
                             interactionSource = remember { MutableInteractionSource() },
                             indication = LocalIndication.current
-                        ) {  },
+                        ) {
+                            viewModel.setSelectedTypes(types)
+                            navController.navigate(Route.Types)
+                        },
                     shape = shape,
                     color = MaterialTheme.colorScheme.surfaceContainer,
                 ) {
@@ -99,19 +111,20 @@ fun CategoryList(categories: SnapshotStateMap<Category, List<VehiclesTypes>>) {
                             .fillMaxWidth()
                             .padding(all = 16.dp)
                     ) {
-                        // Headline
                         Text(
                             text = category.name,
                             style = MaterialTheme.typography.titleMedium
                         )
 
-                        // Description
-                        Text(
-                            text = category.description.takeUnless { it.isNullOrBlank() } ?: "No description",
-                            style = MaterialTheme.typography.bodyMedium
-                        )
+                        if (!category.description.isNullOrBlank()) {
+                            category.description?.let {
+                                Text(
+                                    text = it,
+                                    style = MaterialTheme.typography.bodyMedium
+                                )
+                            }
+                        }
 
-                        // Types info
                         if (types.isNotEmpty()) {
                             Text(
                                 text = "${types.size} vehicle types",
@@ -123,6 +136,5 @@ fun CategoryList(categories: SnapshotStateMap<Category, List<VehiclesTypes>>) {
                 }
             }
         }
-
     }
 }
