@@ -8,6 +8,6 @@ data class VehiclesTypes(
     data class SeriesEntry(
         val id: Int,
         val name: String,
-        val photos: List<Photo>
+        val photoId: Int
     )
 }
