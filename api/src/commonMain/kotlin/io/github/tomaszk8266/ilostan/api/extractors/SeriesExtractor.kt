@@ -13,7 +13,7 @@ import io.ktor.client.statement.bodyAsText
 suspend fun getAndExtractSeries(id: Int) = Series(
     vehicles = Ksoup.parse(client.get("https://ilostan.forumkolejowe.pl/index.php?nav=serie&seria=$id")
         .bodyAsText(Charsets.UTF_8))
-        .body().select("div.main > div.text:nth-child(8) > div tbody > tr.wiersz").map {
+        .body().select("div.main > div.text:nth-child(7) > div tbody > tr.wiersz").mapNotNull {
             val nameLink = it.selectFirst("td:first-child > a")!!
             val idRegex = Regex("""^index.php\?nav=lok&id=(\d+)""")
             val id = idRegex.find(nameLink.attr("href"))!!.groupValues[1].toInt()
@@ -22,7 +22,8 @@ suspend fun getAndExtractSeries(id: Int) = Series(
                 ?.textNodes()[0]!!.text()
                 .trimQuotes().trim()
             val manufacturingDataRegex = Regex("""([a-zA-Z0-9-_]+) (?:\((\d{4})\))?""")
-            val manufacturingDataExtracted = manufacturingDataRegex.find(manufacturingData)!!.groupValues
+            val manufacturingDataExtracted = manufacturingDataRegex.find(manufacturingData)?.groupValues
+                ?: return@mapNotNull null
 
             val ownershipTableCell = it.selectFirst("td:nth-child(2)")!!
 
@@ -30,7 +31,8 @@ suspend fun getAndExtractSeries(id: Int) = Series(
                 id = id,
                 name = nameLink.text(),
                 factoryNumber = manufacturingDataExtracted[1],
-                manufacturingYear = manufacturingDataExtracted[2].toInt(),
+                manufacturingYear = manufacturingDataExtracted[2].toIntOrNull()
+                    ?: return@mapNotNull null,
                 statusHistory = emptyList(),
                 eventHistory = emptyList(),
                 ownershipHistory = listOf(

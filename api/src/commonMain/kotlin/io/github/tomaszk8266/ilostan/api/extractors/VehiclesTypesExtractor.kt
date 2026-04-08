@@ -10,7 +10,7 @@ import io.ktor.client.statement.bodyAsText
 suspend fun getAndExtractVehiclesTypes(categoryId: Int) =
     Ksoup.parse(client.get("https://ilostan.forumkolejowe.pl/index.php?nav=trakcje&typ=$categoryId")
         .bodyAsText(Charsets.UTF_8))
-        .body().select("div.main > div.text:nth-child(8) > div:nth-child(6) tr.wiersz > td.cat").map {
+        .body().select("div.main > div.text:nth-child(7) > div:nth-child(6) tr.wiersz > td.cat").map {
             VehiclesTypes(
                 name = it.selectFirst("span.seria")!!.text(),
                 description = it.selectFirst("div.well")?.text(),

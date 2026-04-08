@@ -13,7 +13,7 @@ import io.ktor.client.statement.bodyAsText
 suspend fun getAndExtractVehicle(id: Int) =
     Ksoup.parse(client.get("https://ilostan.forumkolejowe.pl/index.php?nav=lok&id=$id")
         .bodyAsText(Charsets.UTF_8))
-        .body().selectFirst("div.main > div.text:nth-child(8)")!!.let { content ->
+        .body().selectFirst("div.main > div.text:nth-child(7)")!!.let { content ->
             val header = content.selectFirst("div.container_fluid")!!
             val sections = parseSections(content)
 
