@@ -1,8 +1,11 @@
 package ovh.marceeli.ilostanyou.di
 
+import org.koin.core.module.dsl.viewModel
 import org.koin.dsl.module
-import ovh.marceeli.ilostanyou.ui.viewmodels.SharedDashboardViewModel
+import ovh.marceeli.ilostanyou.ui.viewmodels.DashboardViewModel
+import ovh.marceeli.ilostanyou.ui.viewmodels.VehicleViewModel
 
 val viewModelModule = module {
-    single { SharedDashboardViewModel() }
+    viewModel { DashboardViewModel() }
+    viewModel { VehicleViewModel() }
 }

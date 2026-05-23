@@ -6,7 +6,7 @@ import kotlinx.datetime.LocalDate
 
 val client = HttpClient()
 
-fun parseSections(root: Element): Map<String, Element> {
+internal fun parseSections(root: Element): Map<String, Element> {
     val result = mutableMapOf<String, Element>()
 
     var pendingTitle: String? = null
@@ -28,10 +28,8 @@ fun parseSections(root: Element): Map<String, Element> {
     return result
 }
 
-fun String.parseDate() = try {
+internal fun String.parseDate() = try {
     LocalDate.parse(replace("**", "01").replace("xx", "01"))
 } catch (_: Exception) { null }
 
-fun String.trimQuotes() = Regex("""^"?(.*?)"?$""").find(this)!!.groupValues[1]
-
-fun getPhotoUrl(id: Int) = "https://ilostan.forumkolejowe.pl/foto/$id"
+internal fun String.trimQuotes() = Regex("""^"?(.*?)"?$""").find(this)!!.groupValues[1]

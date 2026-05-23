@@ -7,3 +7,5 @@ data class Photo(
     val date: LocalDate,
     val description: String
 )
+
+fun Int.toPhotoUrl() = "https://ilostan.forumkolejowe.pl/foto/$this.jpg"

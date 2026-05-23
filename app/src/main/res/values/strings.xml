@@ -1,6 +1,5 @@
 <resources>
-    <string name="app_name">Ilostan You</string>
+    <string name="AppName">Ilostan You</string>
 
-    <string name="about_title">About</string>
-    <string name="dashboard_title">Dashboard</string>
+    <string name="Screen_Dashboard">Dashboard</string>
 </resources>
