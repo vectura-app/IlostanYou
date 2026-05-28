@@ -179,12 +179,6 @@ fun DashboardScreen(
             onExpandedChange = { searchBarExpanded = it },
         ) {
             Box {
-                if (state.isLoading) LinearProgressIndicator(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(2.dp)
-                )
-
                 Column(
                     modifier = Modifier
                         .verticalScroll(rememberScrollState())
@@ -210,19 +204,17 @@ fun DashboardScreen(
                         items = state.suggestions.map {
                             ListItemContent(
                                 title = { Text(it.name) },
-                                leading = it.photoUrl?.let { url ->
-                                    {
-                                        AsyncImage(
-                                            model = ImageRequest.Builder(LocalContext.current)
-                                                .data(url)
-                                                .crossfade(true)
-                                                .build(),
-                                            contentDescription = it.name,
-                                            modifier = Modifier.width(56.dp),
-                                            contentScale = ContentScale.FillWidth
-                                        )
-                                    }
-                                },
+                                leading = it.photoUrl?.let { url -> {
+                                    AsyncImage(
+                                        model = ImageRequest.Builder(LocalContext.current)
+                                            .data(url)
+                                            .crossfade(true)
+                                            .build(),
+                                        contentDescription = it.name,
+                                        modifier = Modifier.width(56.dp),
+                                        contentScale = ContentScale.FillWidth,
+                                    )
+                                } },
                                 onClick = {
                                     when (it.type) {
                                         DashboardState.Suggestion.Type.Vehicle -> onVehicleSelect(it.id)
@@ -244,6 +236,12 @@ fun DashboardScreen(
                         colors = ListItemDefaults.colors()
                     )
                 }
+
+                if (state.isLoading) LinearProgressIndicator(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(2.dp)
+                )
             }
         }
     }

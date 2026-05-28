@@ -8,10 +8,12 @@ import io.github.tomaszk8266.ilostan.api.extractors.getAndExtractVehiclesTypes
 import io.github.tomaszk8266.ilostan.api.types.Category
 import io.github.tomaszk8266.ilostan.api.types.VehiclesTypes
 import io.github.tomaszk8266.ilostan.api.types.toPhotoUrl
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 data class DashboardState(
     val query: String = "",
@@ -70,7 +72,7 @@ class DashboardViewModel : ViewModel() {
     }
 
     fun toggleCategory(categoryId: Int) {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             _state.update { it.copy(isLoading = true) }
             _state.update { current ->
                 val newSelected = if (current.selectedCategoryIds.contains(categoryId)) {
@@ -106,8 +108,10 @@ class DashboardViewModel : ViewModel() {
             }
             else -> {
                 val seriesName = query.substringBefore("-")
-                val series = seriesList.firstOrNull { it.name.uppercase() == seriesName }
-                val seriesVehicles = series?.let { getAndExtractSeries(it.id) }?.vehicles.orEmpty()
+                val series = seriesList.firstOrNull { it.name.uppercase().startsWith(seriesName) }
+                val seriesVehicles = withContext(Dispatchers.IO) {
+                    series?.let { getAndExtractSeries(it.id) }?.vehicles.orEmpty()
+                }
 
                 seriesVehicles.map {
                     DashboardState.Suggestion(
@@ -116,6 +120,12 @@ class DashboardViewModel : ViewModel() {
                         name = it.name,
                         photoUrl = null
                     )
+                }.filter {
+                    val vehicleUnitNumber = it.name.uppercase()
+                        .replace(" ", "-")
+                        .substringAfter("-")
+
+                    query.substringAfter("-") in vehicleUnitNumber
                 }
             }
         }
