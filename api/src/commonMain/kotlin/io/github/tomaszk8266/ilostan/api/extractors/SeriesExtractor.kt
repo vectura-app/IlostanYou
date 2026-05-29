@@ -38,8 +38,8 @@ suspend fun getAndExtractSeries(id: Int) = Series(
                 ownershipHistory = listOf(
                     Vehicle.OwnershipEntry(
                         transferDate = null,
-                        owner = ownershipTableCell.selectFirst("a")!!.text(),
-                        carrier = ownershipTableCell.ownText().trimQuotes(),
+                        owner = ownershipTableCell.ownText().trimQuotes(),
+                        carrier = ownershipTableCell.selectFirst("a")!!.text(),
                     )
                 ),
                 repairHistory = emptyList(),

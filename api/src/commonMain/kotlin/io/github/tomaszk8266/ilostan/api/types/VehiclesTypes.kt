@@ -1,7 +1,8 @@
 package io.github.tomaszk8266.ilostan.api.types
 
 data class VehiclesTypes(
-    val name: String,
+    val name: String?,
+    val manufacturerTypeName: String?,
     val description: String?,
     val series: List<SeriesEntry>
 ) {
