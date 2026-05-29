@@ -6,7 +6,6 @@ import io.github.tomaszk8266.ilostan.api.extractors.getAndExtractCategories
 import io.github.tomaszk8266.ilostan.api.extractors.getAndExtractSeries
 import io.github.tomaszk8266.ilostan.api.extractors.getAndExtractVehiclesTypes
 import io.github.tomaszk8266.ilostan.api.types.Category
-import io.github.tomaszk8266.ilostan.api.types.VehiclesTypes
 import io.github.tomaszk8266.ilostan.api.types.toPhotoUrl
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -27,6 +26,8 @@ data class DashboardState(
         val id: Int,
         val type: Type,
         val name: String,
+        val rawName: String?,
+        val description: String?,
         val photoUrl: String?
     ) {
         enum class Type {
@@ -34,6 +35,14 @@ data class DashboardState(
         }
     }
 }
+
+data class VehicleSeries(
+    val id: Int,
+    val seriesName: String,
+    val manufacturerTypeName: String?,
+    val displayName: String?,
+    val photoUrl: String?,
+)
 
 class DashboardViewModel : ViewModel() {
     private val _state = MutableStateFlow(DashboardState(
@@ -44,7 +53,7 @@ class DashboardViewModel : ViewModel() {
     ))
     val state = _state.asStateFlow()
 
-    private var seriesList = mutableListOf<VehiclesTypes.SeriesEntry>()
+    private var seriesList = mutableListOf<VehicleSeries>()
 
     init {
         viewModelScope.launch {
@@ -67,7 +76,17 @@ class DashboardViewModel : ViewModel() {
             getAndExtractVehiclesTypes(id)
         }
         seriesList.clear()
-        seriesList.addAll(allTypes.flatMap { it.series })
+        seriesList.addAll(allTypes.flatMap { type ->
+            type.series.map { series ->
+                VehicleSeries(
+                    id = series.id,
+                    seriesName = series.name,
+                    manufacturerTypeName = type.manufacturerTypeName,
+                    displayName = type.name,
+                    photoUrl = series.photoId.toPhotoUrl()
+                )
+            }
+        })
         updateSuggestions()
     }
 
@@ -94,21 +113,27 @@ class DashboardViewModel : ViewModel() {
     }
 
     private suspend fun updateSuggestions() {
-        val query = _state.value.query.uppercase().replace(" ", "-")
+        val query = _state.value.query.lowercase().replace(" ", "-")
 
         val suggestions = when {
             query.isBlank() -> emptyList()
-            "-" !in query -> seriesList.filter { query in it.name }.map {
+            "-" !in query -> seriesList.filter {
+                query in it.seriesName.lowercase()
+                        || query in it.manufacturerTypeName.orEmpty().lowercase()
+                        || query in it.displayName.orEmpty().lowercase()
+            }.map {
                 DashboardState.Suggestion(
                     id = it.id,
                     type = DashboardState.Suggestion.Type.Series,
-                    name = it.name,
-                    photoUrl = it.photoId.toPhotoUrl()
+                    name = it.displayName?.let { name -> "$name (${it.seriesName})" } ?: it.seriesName,
+                    rawName = it.seriesName,
+                    description = it.manufacturerTypeName,
+                    photoUrl = it.photoUrl
                 )
             }
             else -> {
-                val seriesName = query.substringBefore("-")
-                val series = seriesList.firstOrNull { it.name.uppercase().startsWith(seriesName) }
+                val seriesName = query.substringBefore("-").uppercase()
+                val series = seriesList.firstOrNull { it.seriesName.uppercase().startsWith(seriesName) }
                 val seriesVehicles = withContext(Dispatchers.IO) {
                     series?.let { getAndExtractSeries(it.id) }?.vehicles.orEmpty()
                 }
@@ -118,6 +143,8 @@ class DashboardViewModel : ViewModel() {
                         id = it.id,
                         type = DashboardState.Suggestion.Type.Vehicle,
                         name = it.name,
+                        rawName = null,
+                        description = it.ownershipHistory[0].carrier,
                         photoUrl = null
                     )
                 }.filter {

@@ -18,9 +18,7 @@ import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.input.rememberTextFieldState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.LargeTopAppBar
@@ -54,7 +52,7 @@ import coil3.compose.AsyncImage
 import coil3.request.ImageRequest
 import coil3.request.crossfade
 import org.koin.androidx.compose.koinViewModel
-import ovh.marceeli.ilostanyou.ui.common.components.ExpressiveListItems
+import ovh.marceeli.ilostanyou.ui.common.components.ExpressiveLazyListItems
 import ovh.marceeli.ilostanyou.ui.common.components.ListItemContent
 import ovh.marceeli.ilostanyou.ui.viewmodels.DashboardState
 import ovh.marceeli.ilostanyou.ui.viewmodels.DashboardViewModel
@@ -126,9 +124,7 @@ fun DashboardScreen(
                     .padding(horizontal = 16.dp)
             ) {
                 Column(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .verticalScroll(rememberScrollState()),
+                    modifier = Modifier.fillMaxSize(),
                     verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
                     Text(
@@ -137,7 +133,7 @@ fun DashboardScreen(
                         modifier = Modifier.padding(top = 12.dp)
                     )
 
-                    ExpressiveListItems(state.feedItems.map {
+                    ExpressiveLazyListItems(state.feedItems.map {
                         ListItemContent(
                             title = { Text(it) }
                         )
@@ -180,9 +176,7 @@ fun DashboardScreen(
         ) {
             Box {
                 Column(
-                    modifier = Modifier
-                        .verticalScroll(rememberScrollState())
-                        .padding(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 16.dp),
+                    modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 16.dp),
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     LazyRow(
@@ -200,24 +194,25 @@ fun DashboardScreen(
                         }
                     }
 
-                    ExpressiveListItems(
-                        items = state.suggestions.map {
+                    ExpressiveLazyListItems(
+                        items = state.suggestions.map { suggestion ->
                             ListItemContent(
-                                title = { Text(it.name) },
-                                leading = it.photoUrl?.let { url -> {
+                                title = { Text(suggestion.name) },
+                                subtitle = suggestion.description?.let { { Text(it) } },
+                                leading = suggestion.photoUrl?.let { url -> {
                                     AsyncImage(
                                         model = ImageRequest.Builder(LocalContext.current)
                                             .data(url)
                                             .crossfade(true)
                                             .build(),
-                                        contentDescription = it.name,
+                                        contentDescription = suggestion.name,
                                         modifier = Modifier.width(56.dp),
                                         contentScale = ContentScale.FillWidth,
                                     )
                                 } },
                                 onClick = {
-                                    when (it.type) {
-                                        DashboardState.Suggestion.Type.Vehicle -> onVehicleSelect(it.id)
+                                    when (suggestion.type) {
+                                        DashboardState.Suggestion.Type.Vehicle -> onVehicleSelect(suggestion.id)
                                         DashboardState.Suggestion.Type.Series -> searchTextFieldState.edit {
                                             replace(
                                                 start = 0,
@@ -226,7 +221,7 @@ fun DashboardScreen(
                                                 // naming conventions which consists of both letters
                                                 // and digits, Czech, German and many other only
                                                 // contain digits and space is used as a separator
-                                                text = it.name + if (it.name.toIntOrNull() == null) "-" else " "
+                                                text = suggestion.rawName!! + if (suggestion.rawName.toIntOrNull() == null) "-" else " "
                                             )
                                         }
                                     }
