@@ -107,6 +107,7 @@ fun ExpressiveListItem(
         leadingContent = content.leading,
         headlineContent = content.title,
         supportingContent = content.subtitle,
+        overlineContent = content.overline,
         modifier = Modifier.clip(shape)
             .clickable(
                 enabled = content.onClick != null,
@@ -118,6 +119,7 @@ fun ExpressiveListItem(
 data class ListItemContent(
     val title: @Composable () -> Unit,
     val subtitle: @Composable (() -> Unit)? = null,
+    val overline: @Composable (() -> Unit)? = null,
     val leading: @Composable (() -> Unit)? = null,
     val onClick: (() -> Unit)? = null,
 )

@@ -3,6 +3,7 @@ package ovh.marceeli.ilostanyou.ui.viewmodels
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import io.github.tomaszk8266.ilostan.api.extractors.getAndExtractCategories
+import io.github.tomaszk8266.ilostan.api.extractors.getAndExtractRecentPhots
 import io.github.tomaszk8266.ilostan.api.extractors.getAndExtractSeries
 import io.github.tomaszk8266.ilostan.api.extractors.getAndExtractVehiclesTypes
 import io.github.tomaszk8266.ilostan.api.types.Category
@@ -19,8 +20,9 @@ data class DashboardState(
     val categories: List<Category> = emptyList(),
     val selectedCategoryIds: Set<Int> = emptySet(),
     val suggestions: List<Suggestion> = emptyList(),
-    val isLoading: Boolean = false,
-    val feedItems: List<String> = emptyList(),
+    val searchLoading: Boolean = false,
+    val feedItems: List<FeedItem> = emptyList(),
+    val feedLoading: Boolean = false
 ) {
     data class Suggestion(
         val id: Int,
@@ -34,6 +36,12 @@ data class DashboardState(
             Vehicle, Series
         }
     }
+
+    data class FeedItem(
+        val title: String,
+        val subtitle: String?,
+        val photoUrl: String?
+    )
 }
 
 data class VehicleSeries(
@@ -45,22 +53,32 @@ data class VehicleSeries(
 )
 
 class DashboardViewModel : ViewModel() {
-    private val _state = MutableStateFlow(DashboardState(
-        feedItems = listOf(
-            "Szpont",
-            "Szczur"
-        )
-    ))
+    private val _state = MutableStateFlow(DashboardState())
     val state = _state.asStateFlow()
 
     private var seriesList = mutableListOf<VehicleSeries>()
 
     init {
         viewModelScope.launch {
-            _state.update { it.copy(isLoading = true) }
+            _state.update { it.copy(searchLoading = true) }
             fetchCategories()
             loadVehicleTypes(_state.value.selectedCategoryIds)
-            _state.update { it.copy(isLoading = false) }
+            _state.update { it.copy(searchLoading = false) }
+        }
+        viewModelScope.launch {
+            _state.update { it.copy(feedLoading = true) }
+            _state.update {
+                it.copy(
+                    feedLoading = false,
+                    feedItems = getAndExtractRecentPhots().map { photo ->
+                        DashboardState.FeedItem(
+                            title = "New photo added",
+                            subtitle = photo.description,
+                            photoUrl = photo.id.toPhotoUrl()
+                        )
+                    }
+                )
+            }
         }
     }
 
@@ -92,24 +110,22 @@ class DashboardViewModel : ViewModel() {
 
     fun toggleCategory(categoryId: Int) {
         viewModelScope.launch(Dispatchers.IO) {
-            _state.update { it.copy(isLoading = true) }
+            _state.update { it.copy(searchLoading = true) }
             _state.update { current ->
-                val newSelected = if (current.selectedCategoryIds.contains(categoryId)) {
-                    current.selectedCategoryIds - categoryId
-                } else {
-                    current.selectedCategoryIds + categoryId
-                }
+                val newSelected = if (current.selectedCategoryIds.contains(categoryId))
+                    current.selectedCategoryIds - categoryId else current.selectedCategoryIds + categoryId
+
                 loadVehicleTypes(newSelected)
                 current.copy(selectedCategoryIds = newSelected)
             }
-            _state.update { it.copy(isLoading = false) }
+            _state.update { it.copy(searchLoading = false) }
         }
     }
 
     suspend fun onQueryChange(newQuery: String) {
-        _state.update { it.copy(query = newQuery, isLoading = true) }
+        _state.update { it.copy(query = newQuery, searchLoading = true) }
         updateSuggestions()
-        _state.update { it.copy(isLoading = false) }
+        _state.update { it.copy(searchLoading = false) }
     }
 
     private suspend fun updateSuggestions() {

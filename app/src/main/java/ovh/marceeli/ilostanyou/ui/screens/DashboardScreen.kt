@@ -133,9 +133,21 @@ fun DashboardScreen(
                         modifier = Modifier.padding(top = 12.dp)
                     )
 
-                    ExpressiveLazyListItems(state.feedItems.map {
+                    ExpressiveLazyListItems(state.feedItems.map { item ->
                         ListItemContent(
-                            title = { Text(it) }
+                            title = { Text(item.title) },
+                            subtitle = item.subtitle?.let { { Text(it) } },
+                            leading = item.photoUrl?.let { url -> {
+                                AsyncImage(
+                                    model = ImageRequest.Builder(LocalContext.current)
+                                        .data(url)
+                                        .crossfade(true)
+                                        .build(),
+                                    contentDescription = item.subtitle,
+                                    modifier = Modifier.width(56.dp),
+                                    contentScale = ContentScale.FillWidth,
+                                )
+                            } }
                         )
                     })
 
@@ -232,7 +244,7 @@ fun DashboardScreen(
                     )
                 }
 
-                if (state.isLoading) LinearProgressIndicator(
+                if (state.searchLoading) LinearProgressIndicator(
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(2.dp)

@@ -4,8 +4,9 @@ import kotlinx.datetime.LocalDate
 
 data class Photo(
     val id: Int,
-    val date: LocalDate,
-    val description: String
+    val date: LocalDate?,
+    val description: String,
+    val vehicleId: Int? = null
 )
 
 fun Int.toPhotoUrl() = "https://ilostan.forumkolejowe.pl/foto/$this.jpg"
