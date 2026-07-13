@@ -12,7 +12,7 @@ suspend fun getAndExtractSeries(id: Int) = Series(
     vehicles = client.getAndParse("https://ilostan.forumkolejowe.pl/index.php?nav=serie&seria=$id")
         .select("div.main > div.text:nth-child(7) > div tbody > tr.wiersz").mapNotNull {
             val nameLink = it.selectFirst("td:first-child > a")!!
-            val idRegex = Regex("""^index.php\?nav=lok&id=(\d+)""")
+            val idRegex = Regex("""^index\.php\?nav=lok&id=(\d+)""")
             val id = idRegex.find(nameLink.attr("href"))!!.groupValues[1].toInt()
 
             val manufacturingData = it.selectFirst("td:first-child")

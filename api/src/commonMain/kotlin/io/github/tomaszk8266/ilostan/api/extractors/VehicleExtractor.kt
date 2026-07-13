@@ -40,13 +40,16 @@ suspend fun getAndExtractVehicle(id: Int) =
                     )
                 }.orEmpty(),
                 ownershipHistory = sections["Historia przydziałów"]?.select("tbody > tr")?.map {
-                    val owner = it.selectFirst("td:nth-child(2)")?.text()
+                    val owner = it.selectFirst("td:nth-child(2)")?.ownText()
                         ?.takeIf { t -> t != "-----------" }
-                    val carrier = it.selectFirst("td:nth-child(3)")?.text()
+                        ?: it.selectFirst("td:nth-child(3) > span.wlasnosc")?.text()
+                            ?.substringAfter("(")
+                            ?.substringBeforeLast(")")
+                    val carrier = it.selectFirst("td:nth-child(3)")?.ownText()
 
                     Vehicle.OwnershipEntry(
                         owner = owner ?: carrier!!,
-                        carrier = carrier.takeIf { owner != null },
+                        carrier = carrier.takeIf { owner != null && owner != carrier },
                         transferDate = it.selectFirst("td:nth-child(1)")?.text()?.parseDate()
                     )
                 }.orEmpty(),
