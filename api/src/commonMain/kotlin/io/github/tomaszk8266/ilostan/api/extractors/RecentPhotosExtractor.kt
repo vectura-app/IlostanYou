@@ -1,15 +1,12 @@
 package io.github.tomaszk8266.ilostan.api.extractors
 
-import com.fleeksoft.ksoup.Ksoup
 import io.github.tomaszk8266.ilostan.api.client
+import io.github.tomaszk8266.ilostan.api.getAndParse
 import io.github.tomaszk8266.ilostan.api.types.Photo
-import io.ktor.client.request.get
-import io.ktor.client.statement.bodyAsText
 import kotlin.text.Regex
 
-suspend fun getAndExtractRecentPhots() = Ksoup.parse(client.get("https://ilostan.forumkolejowe.pl/index.php")
-    .bodyAsText(Charsets.UTF_8))
-    .body().select("div.text:has(span.nav:contains(Ostatnio dodane fotografie)) tbody td[align=\"center\"]").mapNotNull {
+suspend fun getAndExtractRecentPhots() = client.getAndParse("https://ilostan.forumkolejowe.pl/index.php")
+    .select("div.text:has(span.nav:contains(Ostatnio dodane fotografie)) tbody td[align=\"center\"]").mapNotNull {
         val vehicleNameElement = it.selectFirst("a.kat")!!
 
         Photo(

@@ -1,19 +1,16 @@
 package io.github.tomaszk8266.ilostan.api.extractors
 
-import com.fleeksoft.ksoup.Ksoup
 import io.github.tomaszk8266.ilostan.api.client
+import io.github.tomaszk8266.ilostan.api.getAndParse
 import io.github.tomaszk8266.ilostan.api.parseDate
 import io.github.tomaszk8266.ilostan.api.parseSections
 import io.github.tomaszk8266.ilostan.api.trimQuotes
 import io.github.tomaszk8266.ilostan.api.types.Photo
 import io.github.tomaszk8266.ilostan.api.types.Vehicle
-import io.ktor.client.request.get
-import io.ktor.client.statement.bodyAsText
 
 suspend fun getAndExtractVehicle(id: Int) =
-    Ksoup.parse(client.get("https://ilostan.forumkolejowe.pl/index.php?nav=lok&id=$id")
-        .bodyAsText(Charsets.UTF_8))
-        .body().selectFirst("div.main > div.text:nth-child(7)")!!.let { content ->
+    client.getAndParse("https://ilostan.forumkolejowe.pl/index.php?nav=lok&id=$id")
+        .selectFirst("div.main > div.text:nth-child(7)")!!.let { content ->
             val header = content.selectFirst("div.container_fluid")!!
             val sections = parseSections(content)
 
