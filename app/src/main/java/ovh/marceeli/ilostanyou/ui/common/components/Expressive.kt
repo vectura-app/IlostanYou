@@ -10,6 +10,7 @@ import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemColors
 import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -108,7 +109,8 @@ fun ExpressiveListItem(
         headlineContent = content.title,
         supportingContent = content.subtitle,
         overlineContent = content.overline,
-        modifier = Modifier.clip(shape)
+        modifier = Modifier
+            .clip(shape)
             .clickable(
                 enabled = content.onClick != null,
                 onClick = content.onClick ?: { }
@@ -122,4 +124,20 @@ data class ListItemContent(
     val overline: @Composable (() -> Unit)? = null,
     val leading: @Composable (() -> Unit)? = null,
     val onClick: (() -> Unit)? = null,
-)
+) {
+    companion object {
+        fun fromStrings(
+            title: String,
+            subtitle: String? = null,
+            overline: String? = null,
+            leading: @Composable (() -> Unit)? = null,
+            onClick: (() -> Unit)? = null
+        ) = ListItemContent(
+            title = { Text(title) },
+            subtitle = subtitle?.let { { Text(it) } },
+            overline = overline?.let { { Text(it) } },
+            leading = leading,
+            onClick = onClick
+        )
+    }
+}

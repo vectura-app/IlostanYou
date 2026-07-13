@@ -41,7 +41,7 @@ suspend fun getAndExtractVehicle(id: Int) =
                 }.orEmpty(),
                 ownershipHistory = sections["Historia przydziałów"]?.select("tbody > tr")?.map {
                     val owner = it.selectFirst("td:nth-child(2)")?.ownText()
-                        ?.takeIf { t -> t != "-----------" }
+                        ?.takeIf { t -> t != "-----------" && t != "brak danych" && t != "Oczekuje kasacji" }
                         ?: it.selectFirst("td:nth-child(3) > span.wlasnosc")?.text()
                             ?.substringAfter("(")
                             ?.substringBeforeLast(")")

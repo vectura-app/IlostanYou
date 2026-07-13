@@ -38,7 +38,10 @@ internal fun parseSections(root: Element): Map<String, Element> {
 }
 
 internal fun String.parseDate() = try {
-    LocalDate.parse(replace("**", "01").replace("xx", "01"))
+    LocalDate.parse(replace("**", "01")
+        .replace("xx", "01")
+        .replace("*", "0")
+        .replace("x", "0"))
 } catch (_: Exception) { null }
 
 internal fun String.trimQuotes() = Regex("""^"?(.*?)"?$""").find(this)!!.groupValues[1]
