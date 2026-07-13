@@ -5,7 +5,7 @@ import io.github.tomaszk8266.ilostan.api.getAndParse
 import io.github.tomaszk8266.ilostan.api.types.Photo
 import kotlin.text.Regex
 
-suspend fun getAndExtractRecentPhots() = client.getAndParse("https://ilostan.forumkolejowe.pl/index.php")
+suspend fun getAndExtractRecentPhots() = client.getAndParse("https://ilostan.forumkolejowe.pl")
     .select("div.text:has(span.nav:contains(Ostatnio dodane fotografie)) tbody td[align=\"center\"]").mapNotNull {
         val vehicleNameElement = it.selectFirst("a.kat")!!
 

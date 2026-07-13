@@ -9,7 +9,7 @@ import io.github.tomaszk8266.ilostan.api.types.Series
 import io.github.tomaszk8266.ilostan.api.types.Vehicle
 
 suspend fun getAndExtractSeries(id: Int) = Series(
-    vehicles = client.getAndParse("https://ilostan.forumkolejowe.pl/index.php?nav=serie&seria=$id")
+    vehicles = client.getAndParse("https://ilostan.forumkolejowe.pl/?nav=serie&seria=$id")
         .select("div.main > div.text:nth-child(7) > div tbody > tr.wiersz").mapNotNull {
             val nameLink = it.selectFirst("td:first-child > a")!!
             val idRegex = Regex("""^index\.php\?nav=lok&id=(\d+)""")
@@ -39,14 +39,14 @@ suspend fun getAndExtractSeries(id: Int) = Series(
                     Vehicle.OwnershipEntry(
                         transferDate = null,
                         owner = owner ?: carrier!!,
-                        carrier = carrier.takeIf { owner != null },
+                        carrier = carrier.takeIf { owner != null }
                     )
                 ),
                 repairHistory = emptyList(),
                 photos = emptyList()
             )
         },
-    photos = client.getAndParse("https://ilostan.forumkolejowe.pl/index.php?nav=nowe_foto&seria=$id")
+    photos = client.getAndParse("https://ilostan.forumkolejowe.pl/?nav=nowe_foto&seria=$id")
         .select("div.main > div.text:nth-child(8) tbody > tr:not(.naglowektab)").map { row ->
             Photo(
                 id = Regex("""^foto/(\d+)\.""")

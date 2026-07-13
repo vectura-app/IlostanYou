@@ -9,7 +9,7 @@ import io.github.tomaszk8266.ilostan.api.types.Photo
 import io.github.tomaszk8266.ilostan.api.types.Vehicle
 
 suspend fun getAndExtractVehicle(id: Int) =
-    client.getAndParse("https://ilostan.forumkolejowe.pl/index.php?nav=lok&id=$id")
+    client.getAndParse("https://ilostan.forumkolejowe.pl/?nav=lok&id=$id")
         .selectFirst("div.main > div.text:nth-child(7)")!!.let { content ->
             val header = content.selectFirst("div.container_fluid")!!
             val sections = parseSections(content)

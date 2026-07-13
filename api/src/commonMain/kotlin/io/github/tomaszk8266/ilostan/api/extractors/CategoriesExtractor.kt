@@ -5,7 +5,7 @@ import io.github.tomaszk8266.ilostan.api.getAndParse
 import io.github.tomaszk8266.ilostan.api.trimQuotes
 import io.github.tomaszk8266.ilostan.api.types.Category
 
-suspend fun getAndExtractCategories() = client.getAndParse("https://ilostan.forumkolejowe.pl/index.php")
+suspend fun getAndExtractCategories() = client.getAndParse("https://ilostan.forumkolejowe.pl")
     .select("div.text:has(span.nav:contains(Tabor trakcyjny)) tbody > tr.wiersz > td.cat").map {
         val categoryLink = it.selectFirst("a")
         val relativeUrl = categoryLink?.attr("href")!!

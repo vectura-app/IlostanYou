@@ -6,7 +6,7 @@ import io.github.tomaszk8266.ilostan.api.trimQuotes
 import io.github.tomaszk8266.ilostan.api.types.VehiclesTypes
 
 suspend fun getAndExtractVehiclesTypes(categoryId: Int) =
-    client.getAndParse("https://ilostan.forumkolejowe.pl/index.php?nav=trakcje&typ=$categoryId")
+    client.getAndParse("https://ilostan.forumkolejowe.pl/?nav=trakcje&typ=$categoryId")
         .select("div.main > div.text:nth-child(7) > div:nth-child(6) tr.wiersz > td.cat").map {
             val description = it.selectFirst("div.well")?.text().takeIf { d -> d != null }
             val (displayName, manufacturerTypeName) = parseVehicleTypeNameAndDescription(
