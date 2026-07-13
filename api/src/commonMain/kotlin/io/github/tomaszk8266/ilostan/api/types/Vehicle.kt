@@ -46,11 +46,29 @@ data class Vehicle(
         AwaitingGeneralRepair,
         GeneralRepair,
         Spare,
-
         AwaitingDeletion,
+        Reintroduced,
         Scrapped,
         Wrecked,
         Exhibited,
-        Other
+        Other;
+
+        companion object {
+            fun fromString(string: String) = when(string) {
+                "Czynny" -> Operated
+                "Nieczynny" -> Unoperated
+                "OR" -> AwaitingRevisionRepair
+                "OG" -> AwaitingGeneralRepair
+                "NR" -> RevisionRepair
+                "NG" -> GeneralRepair
+                "Zapas" -> Spare
+                "Wrak" -> Wrecked
+                "Oczekuje skreslenia", "Oczekuje kasacji" -> AwaitingDeletion
+                "Ponowne wpisanie na stan" -> Reintroduced
+                "Zlomowany" -> Scrapped
+                "Eksponat" -> Exhibited
+                else -> Other
+            }
+        }
     }
 }

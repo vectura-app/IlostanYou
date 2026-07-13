@@ -5,6 +5,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.outlined.CalendarMonth
 import androidx.compose.material.icons.outlined.Factory
+import androidx.compose.material.icons.outlined.RailwayAlert
+import androidx.compose.material.icons.outlined.Train
 import androidx.compose.material3.*
 import androidx.compose.material3.carousel.HorizontalCenteredHeroCarousel
 import androidx.compose.material3.carousel.rememberCarouselState
@@ -66,8 +68,7 @@ fun VehicleScreen(
                 state.vehicle?.photos?.let { photos ->
                     HorizontalCenteredHeroCarousel(
                         state = rememberCarouselState { photos.size },
-                        modifier = Modifier
-                            .fillMaxWidth()
+                        modifier = Modifier.fillMaxWidth()
                             .wrapContentHeight(),
                         itemSpacing = 8.dp,
                         contentPadding = PaddingValues(horizontal = 16.dp)
@@ -87,14 +88,27 @@ fun VehicleScreen(
 
                 ExpressiveListItems(buildList {
                     state.vehicle?.manufacturingYear?.let { add(ListItemContent(
+                        overline = { Text("Manufacturing year") },
                         title = { Text(it.toString()) },
-                        subtitle = { Text("Manufacturing year") },
                         leading = { Icon(Icons.Outlined.CalendarMonth, null) }
                     )) }
 
+                    state.vehicle?.statusHistory?.lastOrNull()?.let { add(ListItemContent(
+                        overline = { Text("Status") },
+                        title = { Text(it.status.name) },
+                        leading = { Icon(Icons.Outlined.RailwayAlert, null) }
+                    )) }
+
+                    state.vehicle?.ownershipHistory?.lastOrNull()?.let { add(ListItemContent(
+                        overline = { Text("Carrier") },
+                        title = { Text(it.carrier ?: "Unknown") },
+                        subtitle = { Text("Owned by ${it.owner}") },
+                        leading = { Icon(Icons.Outlined.Train, null) }
+                    )) }
+
                     state.vehicle?.factoryNumber?.let { add(ListItemContent(
+                        overline = { Text("Factory number") },
                         title = { Text(it) },
-                        subtitle = { Text("Factory number") },
                         leading = { Icon(Icons.Outlined.Factory, null) }
                     )) }
                 })

@@ -18,11 +18,14 @@ suspend fun getAndExtractSeries(id: Int) = Series(
             val manufacturingData = it.selectFirst("td:first-child")
                 ?.textNodes()[0]!!.text()
                 .trimQuotes().trim()
-            val manufacturingDataRegex = Regex("""(?:([a-zA-Z0-9-_]+)\s)?(?:\((\d{4})\))?""")
+            val manufacturingDataRegex = Regex("""(?:([^(]+)\s)?(?:\((\d{4})\))?""")
             val manufacturingDataExtracted = manufacturingDataRegex.find(manufacturingData)?.groupValues
                 ?: return@mapNotNull null
 
-            val ownershipTableCell = it.selectFirst("td:nth-child(2)")!!
+            val ownershipTableCell = it.selectFirst("td:nth-child(2)")
+
+            val owner = ownershipTableCell?.ownText()?.trimQuotes()
+            val carrier = ownershipTableCell?.selectFirst("a")?.text()
 
             Vehicle(
                 id = id,
@@ -35,8 +38,8 @@ suspend fun getAndExtractSeries(id: Int) = Series(
                 ownershipHistory = listOf(
                     Vehicle.OwnershipEntry(
                         transferDate = null,
-                        owner = ownershipTableCell.ownText().trimQuotes(),
-                        carrier = ownershipTableCell.selectFirst("a")!!.text(),
+                        owner = owner ?: carrier!!,
+                        carrier = carrier.takeIf { owner != null },
                     )
                 ),
                 repairHistory = emptyList(),

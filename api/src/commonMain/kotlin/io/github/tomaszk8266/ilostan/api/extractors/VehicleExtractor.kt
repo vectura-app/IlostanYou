@@ -21,22 +21,22 @@ suspend fun getAndExtractVehicle(id: Int) =
                     ?.takeIf { it.isNotBlank() }
                     ?.trimQuotes(),
                 manufacturingYear = header.selectFirst("div.row:nth-child(3) > div:nth-child(2) > h4")!!.ownText().toInt(),
-                statusHistory = sections["Historia statusów"]?.select("tbody > tr")?.map {
+                statusHistory = sections["Historia statusów"]?.select("tbody > tr")?.mapNotNull {
                     val detailsColumn = it.selectFirst("td:nth-child(2)")?.textNodes()
 
                     Vehicle.StatusEntry(
-                        status = when(detailsColumn?.getOrNull(0)?.text()) {
-                            else -> Vehicle.Status.Other
-                        },
+                        status = Vehicle.Status.fromString(detailsColumn?.getOrNull(0)?.text().orEmpty()),
                         comment = detailsColumn?.getOrNull(1)?.text(),
-                        date = it.selectFirst("td:nth-child(1)")?.text()?.parseDate()!!
+                        date = it.selectFirst("td:nth-child(1)")?.text()?.parseDate()
+                            ?: return@mapNotNull null
                     )
                 }.orEmpty(),
-                eventHistory = sections["Historia zdarzeń"]?.select("tbody > tr")?.map {
+                eventHistory = sections["Historia zdarzeń"]?.select("tbody > tr")?.mapNotNull {
                     Vehicle.EventEntry(
                         event = it.selectFirst("td:nth-child(3)")!!.text(),
                         description = it.selectFirst("td:nth-child(2)")!!.text(),
-                        date = it.selectFirst("td:first-child")?.text()?.parseDate()!!
+                        date = it.selectFirst("td:first-child")?.text()?.parseDate()
+                            ?: return@mapNotNull null
                     )
                 }.orEmpty(),
                 ownershipHistory = sections["Historia przydziałów"]?.select("tbody > tr")?.map {
@@ -46,7 +46,7 @@ suspend fun getAndExtractVehicle(id: Int) =
 
                     Vehicle.OwnershipEntry(
                         owner = owner ?: carrier!!,
-                        carrier = carrier,
+                        carrier = carrier.takeIf { owner != null },
                         transferDate = it.selectFirst("td:nth-child(1)")?.text()?.parseDate()
                     )
                 }.orEmpty(),

@@ -23,12 +23,8 @@ class VehicleViewModel : ViewModel() {
     fun loadVehicle(vehicleId: Int) {
         viewModelScope.launch(Dispatchers.IO) {
             _state.update { VehicleState(isLoading = true) }
-            try {
-                val vehicle = getAndExtractVehicle(vehicleId)
-                _state.update { VehicleState(isLoading = false, vehicle = vehicle) }
-            } catch (e: Exception) {
-                _state.update { VehicleState(isLoading = false, error = e.message) }
-            }
+            val vehicle = getAndExtractVehicle(vehicleId)
+            _state.update { VehicleState(isLoading = false, vehicle = vehicle) }
         }
     }
 }
